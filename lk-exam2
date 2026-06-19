@@ -1,0 +1,74 @@
+set -uo pipefail
+
+clear
+
+validate_sid() {
+    if [[ "$1" =~ ^[A-Za-z]{0,2}[0-9]{12}$ ]]; then
+        return 0
+    fi
+    return 1
+}
+
+validate_major() {
+    if [[ "$1" =~ ^[A-Za-z]+$ ]]; then
+        return 0
+    fi
+    return 1
+}
+
+student_id=""
+while true; do
+    echo -n "请输入学号（如 202014060250 或 Z202214050219）："
+    read -r student_id
+    if validate_sid "$student_id"; then
+        echo "学号校验通过：$student_id"
+        break
+    else
+        echo "学号格式错误！请输入正确格式（可选字母前缀 + 12位数字）"
+        echo -n "按回车重新输入，输入 q 退出："
+        read -r choice
+        if [[ "$choice" == "q" || "$choice" == "Q" ]]; then
+            echo "程序退出"
+            exit 0
+        fi
+    fi
+done
+
+echo ""
+
+major=""
+while true; do
+    echo -n "请输入专业名（英文，如 SoftwareEngineering）："
+    read -r major
+    if validate_major "$major"; then
+        echo "专业名校验通过：$major"
+        break
+    else
+        echo "专业名格式错误！只能包含英文字母"
+        echo -n "按回车重新输入，输入 q 退出："
+        read -r choice
+        if [[ "$choice" == "q" || "$choice" == "Q" ]]; then
+            echo "程序退出"
+            exit 0
+        fi
+    fi
+done
+
+echo ""
+
+if id "$student_id" &>/dev/null; then
+    echo "用户 $student_id 已存在，无需创建"
+else
+    echo "用户 $student_id 不存在，创建用户的命令如下："
+    echo "----------------------------------------"
+    echo "  sudo useradd -m -g $major $student_id"
+    echo "  sudo passwd $student_id"
+    echo "----------------------------------------"
+    echo "(以上命令未真实执行，仅作展示)"
+fi
+
+echo ""
+echo "当前时间: $(date '+%Y-%m-%d %H:%M:%S')"
+echo -n "按任意键结束脚本..."
+read -r -n 1
+echo ""
